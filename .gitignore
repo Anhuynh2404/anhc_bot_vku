@@ -1,0 +1,138 @@
+# ==============================================================================
+# ROS 2 & Colcon Build System
+# ==============================================================================
+build/
+install/
+log/
+*/build/
+*/install/
+*/log/
+
+# ==============================================================================
+# Python
+# ==============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+.venv/
+.env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pytest / Coverage
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ==============================================================================
+# C / C++
+# ==============================================================================
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# ==============================================================================
+# IDEs & Editors
+# ==============================================================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# CLion / IntelliJ / JetBrains
+.idea/
+cmake-build-*/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.project
+.cproject
+.settings/
+
+# Vim / Emacs / Nano
+*~
+*.swp
+*.swo
+.*.sw[a-p]
+*#
+.#*
+
+# ==============================================================================
+# OS Generated Files
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==============================================================================
+# ROS/Gazebo Specific (Tùy chọn)
+# ==============================================================================
+# Bỏ comment nếu không muốn track các file bản đồ sinh ra tự động
+# config/maps/*.yaml
+# config/maps/*.pgm
