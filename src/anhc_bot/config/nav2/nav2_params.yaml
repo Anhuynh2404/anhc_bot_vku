@@ -135,19 +135,12 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.06
-      footprint: "[[ 0.450,  0.000],
-                  [ 0.318,  0.318],
-                  [ 0.000,  0.450],
-                  [-0.318,  0.318],
-                  [-0.450,  0.000],
-                  [-0.318, -0.318],
-                  [ 0.000, -0.450],
-                  [ 0.318, -0.318]]"
+      footprint: "[[0.45, 0.35], [-0.45, 0.35], [-0.45, -0.35], [0.45, -0.35]]"
       plugins: ["static_layer", "voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 4.0
-        inflation_radius: 0.55
+        inflation_radius: 0.65
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: true
@@ -181,14 +174,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      footprint: "[[ 0.450,  0.000],
-                  [ 0.318,  0.318],
-                  [ 0.000,  0.450],
-                  [-0.318,  0.318],
-                  [-0.450,  0.000],
-                  [-0.318, -0.318],
-                  [ 0.000, -0.450],
-                  [ 0.318, -0.318]]"
+      footprint: "[[0.45, 0.35], [-0.45, 0.35], [-0.45, -0.35], [0.45, -0.35]]"
       resolution: 0.06
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -212,7 +198,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 4.0
-        inflation_radius: 0.55
+        inflation_radius: 0.65
       always_send_full_costmap: true
 
 planner_server:

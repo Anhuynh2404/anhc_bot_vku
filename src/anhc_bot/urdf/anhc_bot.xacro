@@ -3,50 +3,48 @@
 
     <!--................................ XACRO CONSTANTS .............................. -->
 
-    <xacro:property name="chassis_mass" value="70"/>
-    <xacro:property name="chassis_length" value="0.9"/>
-    <xacro:property name="chassis_width" value="0.64"/>
-    <xacro:property name="chassis_height" value="0.19"/>
+    <!-- Chassis dimensions (từ phân tích mesh baselink.obj) -->
+    <xacro:property name="chassis_mass"   value="50"/>
+    <xacro:property name="chassis_length" value="0.80"/>
+    <xacro:property name="chassis_width"  value="0.62"/>
+    <xacro:property name="chassis_height" value="0.60"/>
 
-    <xacro:property name="traction_wheel_mass" value="1"/>
-    <xacro:property name="traction_wheel_base" value="0.88"/>
-    <xacro:property name="traction_max_wheel_torque" value="20000"/>
-    <xacro:property name="traction_wheel_friction" value="5.0"/>
+    <!-- Wheel parameters (từ phân tích mesh: size 0.16x0.16x0.08 m) -->
+    <xacro:property name="wheel_mass"     value="1.5"/>
+    <xacro:property name="wheel_radius"   value="0.08"/>
+    <xacro:property name="wheel_width"    value="0.08"/>
+    <xacro:property name="wheel_friction" value="1.0"/>
 
-    <xacro:property name="trolley_wheel_mass" value="0.1"/>
-    <xacro:property name="trolley_track_width" value="0.54"/>
-    <xacro:property name="trolley_wheel_friction" value="0.0"/>
-    <xacro:property name="trolley_wheel_radius" value="0.06"/>
-    <!-- a small constant -->
-    <xacro:property name="eps" value="0.002"/>
+    <!-- Track geometry -->
+    <!-- Khoảng cách tâm-tâm 2 bánh trái-phải -->
+    <xacro:property name="track_width"    value="0.54"/>
+    <!-- Khoảng cách tâm-tâm bánh trước - bánh sau -->
+    <xacro:property name="wheel_base"     value="0.56"/>
 
-    <xacro:property name="traction_wheel_radius" value="0.1"/>
-    <xacro:property name="traction_wheel_width" value="0.05"/>
-    <xacro:property name="traction_track_width" value="0.6"/>
+    <!-- 2D LiDAR parameters -->
+    <xacro:property name="two_d_lidar_update_rate"  value="30"/>
+    <xacro:property name="two_d_lidar_sample_size"  value="361"/>
+    <xacro:property name="two_d_lidar_min_angle"    value="0"/>
+    <xacro:property name="two_d_lidar_max_angle"    value="360"/>
+    <xacro:property name="two_d_lidar_min_range"    value="0.15"/>
+    <xacro:property name="two_d_lidar_max_range"    value="16"/>
 
-    <xacro:property name="two_d_lidar_update_rate" value="30"/>
-    <xacro:property name="two_d_lidar_sample_size" value="361"/>
-    <xacro:property name="two_d_lidar_min_angle" value="0"/>
-    <xacro:property name="two_d_lidar_max_angle" value="360"/>
-    <xacro:property name="two_d_lidar_min_range" value="0.55"/>
-    <xacro:property name="two_d_lidar_max_range" value="16"/>
-
-    <xacro:property name="camera_baseline" value="0.06"/>
-    <xacro:property name="camera_height" value="0.10"/>
+    <!-- Camera -->
     <xacro:property name="camera_horizontal_fov" value="60"/>
 
-    <xacro:arg name="robot_namespace" default=""/>
-    <xacro:arg name="wheel_odom_topic" default="odom" />
-    <xacro:arg name="camera_enabled" default="false" />
-    <xacro:arg name="stereo_camera_enabled" default="false" />
-    <xacro:arg name="two_d_lidar_enabled" default="false" />
-    <xacro:arg name="publish_wheel_odom_tf" default="true" />
-    <xacro:arg name="conveyor_enabled" default="false"/>
-    <xacro:arg name="ground_truth_frame" default="map"/>
-    <xacro:arg name="sim_gazebo" default="false" />
-    <xacro:arg name="sim_ign" default="false" />
-    <xacro:arg name="sim_gz" default="false" />
-    <xacro:arg name="odometry_source" default="world" />
+    <!--................................ XACRO ARGS .................................. -->
+
+    <xacro:arg name="robot_namespace"        default=""/>
+    <xacro:arg name="wheel_odom_topic"       default="odom"/>
+    <xacro:arg name="camera_enabled"         default="false"/>
+    <xacro:arg name="stereo_camera_enabled"  default="false"/>
+    <xacro:arg name="two_d_lidar_enabled"    default="false"/>
+    <xacro:arg name="publish_wheel_odom_tf"  default="true"/>
+    <xacro:arg name="ground_truth_frame"     default="map"/>
+    <xacro:arg name="sim_gazebo"             default="false"/>
+    <xacro:arg name="sim_ign"                default="false"/>
+    <xacro:arg name="sim_gz"                 default="false"/>
+    <xacro:arg name="odometry_source"        default="world"/>
 
     <xacro:property name="odometry_source" value="$(arg odometry_source)"/>
 
@@ -67,256 +65,248 @@
         <xacro:include filename="$(find anhc_bot)/urdf/gz.xacro"/>
     </xacro:if>
 
-    <!-- ................................ BASE LINK .................................. -->
+    <!-- ========================= BASE LINKS ================================ -->
+
+    <!-- base_footprint: điểm tiếp xúc đất, trục gốc điều hướng -->
     <link name="base_footprint"/>
 
+    <!-- base_link: tâm robot ở độ cao tâm bánh xe (wheel_radius) -->
     <link name="base_link"/>
 
     <joint name="base_joint" type="fixed">
         <parent link="base_footprint"/>
-        <child link="base_link"/>
-        <origin xyz="0.0 0 ${chassis_height/2 + traction_wheel_radius}" rpy="0 0 0.0" />
+        <child  link="base_link"/>
+        <origin xyz="0.0 0.0 ${wheel_radius + 0.06}" rpy="0 0 0"/>
     </joint>
 
+    <!-- ========================= CHASSIS =================================== -->
+    <!--
+        baselink.obj: X=[-1.4101,-0.6101] Y=[-0.0094,0.6133] Z=[-0.3003,0.3000]
+        Tâm mesh: (-1.0101, 0.3020, -0.0001)
+        Visual offset để tâm mesh về gốc base_link + dịch lên theo Z
+        để đáy chassis (Z=-0.30) khớp với mặt đất (Z=0 = wheel center).
+        Shift Z: +0.30 (đưa đáy mesh lên Z=0 trong frame base_link)
+    -->
     <link name="chassis_link">
-
         <collision>
-            <origin xyz="0 0 -0.05" rpy="0 0 0" />
+            <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
             <geometry>
-                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+                <box size="${chassis_length} 0.50 ${chassis_height - 0.16}"/>
             </geometry>
         </collision>
 
         <visual>
-            <origin xyz="0 0 -0.205" rpy="0 0 0" />
+            <!-- Offset = -rotated_mesh_center + Z lift -->
+            <origin xyz="1.0101 -0.0001 -0.0020" rpy="${pi/2} 0 0"/>
             <geometry>
-                <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot_mesh.dae" scale="1 1 1"/>
+                <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot/baselink.obj" scale="1 1 1"/>
             </geometry>
         </visual>
 
         <inertial>
-            <mass value="${chassis_mass}" />
-            <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z = "${chassis_height}"/>
+            <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+            <mass value="${chassis_mass}"/>
+            <xacro:box_inertia m="${chassis_mass}"
+                               x="${chassis_length}"
+                               y="${chassis_width}"
+                               z="${chassis_height}"/>
         </inertial>
-
     </link>
 
     <joint name="chassis_joint" type="fixed">
         <parent link="base_link"/>
-        <child link="chassis_link"/>
-        <origin xyz="0.0 0 0" rpy="0 0 0.0" />
+        <child  link="chassis_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
     </joint>
 
-    <!-- ................................ WHEELS ..................................... -->
+    <!-- ========================= 4 WHEELS ================================== -->
+    <!--
+        Các bánh xe đặt tại 4 góc robot:
+          Front axle: X = +wheel_base/2
+          Rear axle:  X = -wheel_base/2
+          Left side:  Y = +track_width/2
+          Right side: Y = -track_width/2
+          Z = 0 (tâm bánh = tâm base_link = wheel_radius so với mặt đất)
 
-    <xacro:trolley_wheel cardinality="front" dexterity="left" origin_x="${chassis_length/2}" origin_y="${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
-    <xacro:trolley_wheel cardinality="front" dexterity="right" origin_x="${chassis_length/2}" origin_y="-${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+        Mesh offsets (negate mesh center để đưa về gốc joint):
+          front_left  : center=(0.0085, 0.0721, 0.0281) → offset=(-0.0085,-0.0721,-0.0281)
+          front_right : center=(-0.3637,0.0582, 0.0734) → offset=(0.3637,-0.0582,-0.0734)
+          back_left   : center=(0.0000, 0.0776, 0.0055) → offset=(0.0000,-0.0776,-0.0055)
+          back_right  : center=(0.2442, 0.0652,-0.2464) → offset=(-0.2442,-0.0652,0.2464)
+    -->
 
-    <xacro:trolley_wheel cardinality="back" dexterity="left" origin_x="-${chassis_length/2}" origin_y="${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
-    <xacro:trolley_wheel cardinality="back" dexterity="right" origin_x="-${chassis_length/2}" origin_y="-${trolley_track_width/2}" origin_z="-${trolley_wheel_radius+chassis_height/2}"/>
+    <!-- Front-Left wheel (chủ động - DiffDrive LEFT) -->
+    <xacro:wheel_link
+        name="front_left"
+        mesh_file="front_left_wheel"
+        origin_x="${ wheel_base/2 + 0.04}" origin_y="${ track_width/2}" origin_z="0.04"
+        mesh_cx="0.0085"  mesh_cy="0.0721"  mesh_cz="0.0281"
+        joint_type="continuous" flip_y="1"/>
 
-    <xacro:traction_wheel cardinality="middle" dexterity="left" origin_x="0" origin_y="${traction_track_width/2}" origin_z="-${chassis_height/2+2*trolley_wheel_radius+eps-traction_wheel_radius}"/>
-    <xacro:traction_wheel cardinality="middle" dexterity="right" origin_x="0" origin_y="-${traction_track_width/2}" origin_z="-${chassis_height/2+2*trolley_wheel_radius+eps-traction_wheel_radius}"/>
+    <!-- Front-Right wheel (chủ động - DiffDrive RIGHT) -->
+    <xacro:wheel_link
+        name="front_right"
+        mesh_file="front_right_wheel"
+        origin_x="${ wheel_base/2 + 0.04}" origin_y="${-track_width/2}" origin_z="0.04"
+        mesh_cx="-0.3637" mesh_cy="0.0582"  mesh_cz="0.0734"
+        joint_type="continuous" flip_y="-1"/>
 
-    <!-- ............................. 2D LIDAR ........................................ -->
+    <!-- Back-Left wheel (bị động nhưng continuous để theo DiffDrive) -->
+    <xacro:wheel_link
+        name="back_left"
+        mesh_file="back_left_wheel"
+        origin_x="${-wheel_base/2 + 0.14}" origin_y="${ track_width/2}" origin_z="0.04"
+        mesh_cx="0.0000"  mesh_cy="0.0776"  mesh_cz="0.0055"
+        joint_type="continuous" flip_y="1"/>
 
-    <xacro:if value="$(arg two_d_lidar_enabled)">
+    <!-- Back-Right wheel (bị động nhưng continuous để theo DiffDrive) -->
+    <xacro:wheel_link
+        name="back_right"
+        mesh_file="back_right_wheel"
+        origin_x="${-wheel_base/2 + 0.14}" origin_y="${-track_width/2}" origin_z="0.04"
+        mesh_cx="0.2442"  mesh_cy="0.0652"  mesh_cz="-0.2464"
+        joint_type="continuous" flip_y="-1"/>
 
-        <link name="two_d_lidar">
-            <collision>
-                <origin xyz="0 0 0" rpy="0 0 0" />
-                <geometry>
-                    <cylinder length="0.06" radius="0.075"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin xyz="0 0 0" rpy="0 0 0" />
-                <geometry>
-                    <cylinder length="0.06" radius="0.075"/>
-                </geometry>
-                <material name="aluminium"/>
-            </visual>
-
-            <inertial>
-                <origin xyz="0 0 0" rpy="0 0 0" />
-                <mass value="0.1"/>
-                <xacro:cylinder_inertia m="0.1" r="0.075" h="0.06"/>
-            </inertial>
-        </link>
-
-        <joint name="two_d_lidar_joint" type="fixed">
-            <parent link="base_link"/>
-            <child link="two_d_lidar"/>
-            <origin xyz="0.0 0 0.08" rpy="0 0 0" />
-        </joint>
-
-        <gazebo reference="two_d_lidar">
-            <material>Gazebo/White</material>
-        </gazebo>
-
-    </xacro:if>
-
-    <!-- ............................. IMU ........................................ -->
+    <!-- ========================= IMU ======================================= -->
 
     <link name="imu_frame"/>
 
     <joint name="imu_joint" type="fixed">
         <parent link="base_link"/>
-        <child link="imu_frame"/>
-        <origin xyz="0.0 0.0 0.08" rpy="0.0 0.0 0.0"/>
+        <child  link="imu_frame"/>
+        <origin xyz="0.0 0.0 0.05" rpy="0.0 0.0 0.0"/>
     </joint>
 
-    <!-- ............................. CAMERA ........................................ -->
+    <!-- ========================= 2D LIDAR ================================== -->
+    <!--
+        lidar.obj: size 0.10x0.06x0.08 m, center=(-0.0132,-0.0205,0.0000)
+        Đặt trên nóc chassis: Z = chassis_height = 0.60m so với base_link
+    -->
+    <xacro:if value="$(arg two_d_lidar_enabled)">
 
-    <xacro:if value="$(arg camera_enabled)">
-
-        <!-- KINECT CAMERA -->
-
-        <link name="kinect_camera">
-
+        <link name="two_d_lidar">
             <collision>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.07 0.3 0.09"/>
+                    <cylinder length="0.08" radius="0.05"/>
                 </geometry>
             </collision>
 
             <visual>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0.0132 0.0 0.0205" rpy="${pi/2} 0 0"/>
                 <geometry>
-                    <mesh filename="file://$(find anhc_bot)/meshes/kinect/d415.dae"/>
+                    <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot/lidar.obj" scale="1 1 1"/>
                 </geometry>
-                <material name="black"/>
             </visual>
 
             <inertial>
-                <mass value="0.01"/>
-                <xacro:box_inertia m="0.01" x="0.07" y="0.3" z = "0.09"/>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.2"/>
+                <xacro:cylinder_inertia m="0.2" r="0.05" h="0.08"/>
             </inertial>
-
         </link>
 
-        <joint name="kinect_camera_joint" type="fixed">
-            <origin rpy="0 0 0" xyz="${chassis_length/2} 0 ${chassis_height/7}"/>
+        <joint name="two_d_lidar_joint" type="fixed">
             <parent link="base_link"/>
-            <child link="kinect_camera"/>
+            <child  link="two_d_lidar"/>
+            <!-- Trên nóc chassis, chính giữa -->
+            <origin xyz="0.0 0.0 ${chassis_height + 0.04}" rpy="0 0 0"/>
         </joint>
 
-        <link name="kinect_camera_optical"/>
-
-        <joint name="kinect_camera_optical_joint" type="fixed">
-            <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-            <parent link="kinect_camera"/>
-            <child link="kinect_camera_optical"/>
-        </joint>
+        <gazebo reference="two_d_lidar">
+            <material>Gazebo/DarkGrey</material>
+        </gazebo>
 
     </xacro:if>
 
-    <!-- .............................STEREO CAMERA ........................................ -->
+    <!-- ========================= CAMERA ==================================== -->
+    <!--
+        camera.obj: size 0.08x0.06x0.18 m, center=(-0.0133,-0.0128,0.0000)
+        Đặt phía trước chassis, ở độ cao vừa phải
+    -->
+    <xacro:if value="$(arg camera_enabled)">
+
+        <link name="camera_link">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="0.08 0.18 0.06"/>
+                </geometry>
+            </collision>
+
+            <visual>
+                <origin xyz="0.0133 0.0 0.0128" rpy="${pi/2} 0 0"/>
+                <geometry>
+                    <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot/camera.obj" scale="1 1 1"/>
+                </geometry>
+            </visual>
+
+            <inertial>
+                <mass value="0.1"/>
+                <xacro:box_inertia m="0.1" x="0.08" y="0.18" z="0.06"/>
+            </inertial>
+        </link>
+
+        <joint name="camera_joint" type="fixed">
+            <parent link="base_link"/>
+            <child  link="camera_link"/>
+            <!-- Phía trước, ở 1/3 chiều cao chassis -->
+            <origin xyz="${chassis_length/2 - 0.02} 0.0 ${chassis_height * 0.35}" rpy="0 0 0"/>
+        </joint>
+
+        <link name="camera_optical"/>
+        <joint name="camera_optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+            <parent link="camera_link"/>
+            <child  link="camera_optical"/>
+        </joint>
+
+        <gazebo reference="camera_link">
+            <material>Gazebo/DarkGrey</material>
+        </gazebo>
+
+    </xacro:if>
+
+    <!-- ========================= STEREO CAMERA ============================= -->
 
     <xacro:if value="$(arg stereo_camera_enabled)">
 
-        <!-- STEREO CAMERA -->
-
         <link name="stereo_camera">
-
             <collision>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <box size="0.07 0.3 0.09"/>
+                    <box size="0.08 0.18 0.06"/>
                 </geometry>
             </collision>
 
             <visual>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0.0133 0.0 0.0128" rpy="${pi/2} 0 0"/>
                 <geometry>
-                    <mesh filename="file://$(find anhc_bot)/meshes/kinect/d415.dae"/>
+                    <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot/camera.obj" scale="1 1 1"/>
                 </geometry>
-                <material name="black"/>
             </visual>
 
             <inertial>
-                <mass value="0.01"/>
-                <xacro:box_inertia m="0.01" x="0.07" y="0.3" z = "0.09"/>
+                <mass value="0.1"/>
+                <xacro:box_inertia m="0.1" x="0.08" y="0.18" z="0.06"/>
             </inertial>
-
         </link>
 
         <joint name="stereo_camera_joint" type="fixed">
-            <origin rpy="0 0 0" xyz="${chassis_length/2} 0 ${chassis_height/7}"/>
+            <origin rpy="0 0 0" xyz="${chassis_length/2 - 0.02} 0.0 ${chassis_height * 0.35}"/>
             <parent link="base_link"/>
-            <child link="stereo_camera"/>
+            <child  link="stereo_camera"/>
         </joint>
 
         <link name="stereo_camera_optical"/>
-
         <joint name="stereo_camera_optical_joint" type="fixed">
             <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
             <parent link="stereo_camera"/>
-            <child link="stereo_camera_optical"/>
+            <child  link="stereo_camera_optical"/>
         </joint>
 
     </xacro:if>
 
-    <!-- ............................. ROOF ........................................ -->
-
-    <link name="roof_link">
-
-        <collision>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <geometry>
-                <box size="${chassis_length} ${chassis_width} 0.015"/>
-            </geometry>
-        </collision>
-
-        <inertial>
-            <mass value="1"/>
-            <xacro:box_inertia m="1" x="1" y="0.6" z = "0.015"/>
-        </inertial>
-
-    </link>
-
-    <joint name="roof joint" type="fixed">
-        <parent link="chassis_link"/>
-        <child link="roof_link"/>
-        <origin xyz="0 0 0.16" rpy="0 0 0" />
-    </joint>
-
-    <!-- ............................. CONVEYOR ........................................ -->
-
-    <xacro:if value="$(arg conveyor_enabled)">
-
-        <link name="conveyor_belt">
-
-            <collision>
-                <origin xyz="0 0 0" rpy="0 0 0" />
-                <geometry>
-                    <box size="1 0.6 0.015"/>
-                </geometry>
-            </collision>
-
-            <visual>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <geometry>
-                    <box size="1 0.6 0.015"/>
-                </geometry>
-            </visual>
-
-            <inertial>
-                <mass value="1"/>
-                <xacro:box_inertia m="1" x="1" y="0.6" z = "0.015"/>
-            </inertial>
-
-        </link>
-
-        <joint name="conveyor_joint" type="fixed">
-            <parent link="base_link"/>
-            <child link="conveyor_belt"/>
-            <origin xyz="0 0 0.25" rpy="0 0 0" />
-        </joint>
-
-    </xacro:if>
     <!-- ............................................................................... -->
 
 </robot>

@@ -103,6 +103,7 @@ Sau đó **Ctrl+C** tất cả các terminal ở Giai đoạn 1.
 
 Mở **Terminal 1** — Khởi động lại Gazebo:
 ```bash
+cd ~/anhc_ws
 source ~/anhc_ws/install/setup.bash
 ros2 launch anhc_bot simulation.launch.py \
   camera_enabled:=True \
@@ -112,6 +113,7 @@ ros2 launch anhc_bot simulation.launch.py \
 
 Mở **Terminal 2** — Khởi động Nav2 (RViz2 sẽ tự động mở kèm giao diện Nav2):
 ```bash
+cd ~/anhc_ws
 source ~/anhc_ws/install/setup.bash
 ros2 launch anhc_bot navigation.launch.py
 ```
