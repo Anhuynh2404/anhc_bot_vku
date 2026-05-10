@@ -1,0 +1,11 @@
+<library path="anhc_multi_planner">
+  <class name="anhc_multi_planner::AnhcMultiPlanner"
+         type="anhc_multi_planner::AnhcMultiPlanner"
+         base_class_type="nav2_core::GlobalPlanner">
+    <description>
+      Unified multi-algorithm global planner for anhc_bot.
+      Supports astar, dijkstra, greedy_bfs, theta_star, jps, rrt_star, dstar_lite.
+      Switch algorithm at runtime via /planning/set_algorithm (std_msgs/String).
+    </description>
+  </class>
+</library>

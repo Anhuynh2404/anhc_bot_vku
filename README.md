@@ -1,4 +1,4 @@
-# anhc_bot
+# ANHC_BOT
 
 ROS 2 Jazzy + Gazebo Harmonic mobile robot simulation package.
 
