@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>anhc_bot</name>
+	<version>1.0.0</version>
+	<description>anhc_bot — ROS 2 Jazzy + Gazebo Harmonic mobile robot simulation with diff-drive, 2D LiDAR, depth camera, SLAM Toolbox, and Nav2. Forked and restructured from bcr_bot.</description>
+
+	<maintainer email="anhuynh@anhc.dev">An Huynh</maintainer>
+	<license>Apache License 2.0</license>
+
+	<buildtool_depend>ament_cmake</buildtool_depend>
+
+	<exec_depend>ament_index_python</exec_depend>
+	<exec_depend>launch</exec_depend>
+	<exec_depend>launch_ros</exec_depend>
+	<exec_depend>robot_state_publisher</exec_depend>
+	<exec_depend>xacro</exec_depend>
+
+	<export>
+		<build_type>ament_cmake</build_type>
+	</export>
+</package>
