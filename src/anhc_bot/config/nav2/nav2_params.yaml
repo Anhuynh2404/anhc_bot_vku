@@ -147,7 +147,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 4.0
-        inflation_radius: 0.45
+        inflation_radius: 0.55
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: true
@@ -212,7 +212,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 4.0
-        inflation_radius: 0.45
+        inflation_radius: 0.55
       always_send_full_costmap: true
 
 planner_server:
@@ -221,10 +221,21 @@ planner_server:
     #expected_planner_frequency: 20.0
     planner_plugins: ["GridBased"]
     GridBased:
-      plugin: "nav2_navfn_planner::NavfnPlanner"
-      tolerance: 0.5
-      use_astar: false
+      # ── Custom from-scratch A* planner (anhc_astar_planner package) ──────
+      plugin: "anhc_astar_planner::AnhcAstarPlanner"
+      # Distance in metres between consecutive waypoints in the output path.
+      # Smaller → smoother path; larger → fewer poses (faster controller).
+      interpolation_resolution: 0.05
+      # Allow planning through UNKNOWN costmap cells (cost == 255).
       allow_unknown: true
+      # Heuristic weight w: 1.0 = admissible (optimal path).
+      # Raise to e.g. 2.0 for faster (slightly suboptimal) planning.
+      weight_heuristic: 1.0
+      # Scales how much the costmap cost penalises traversal of near-obstacle
+      # cells. Higher values force wider detours around obstacles.
+      cost_penalty_factor: 3.0
+      # Hard cap on A* iterations to prevent runaway planning in edge cases.
+      max_iterations: 1000000
 
 smoother_server:
   ros__parameters:
