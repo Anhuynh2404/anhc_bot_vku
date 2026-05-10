@@ -1,0 +1,10 @@
+<library path="anhc_astar_planner">
+  <class name="anhc_astar_planner::AnhcAstarPlanner"
+         type="anhc_astar_planner::AnhcAstarPlanner"
+         base_class_type="nav2_core::GlobalPlanner">
+    <description>
+      Scratch A* (8-connected, weighted heuristic) global planner plugin for anhc_bot.
+      Replaces Nav2's default NavFn planner without depending on any Nav2 planner library.
+    </description>
+  </class>
+</library>

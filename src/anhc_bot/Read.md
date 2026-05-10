@@ -20,7 +20,7 @@ rosdep update
 rosdep install --from-paths src --ignore-src -r -y
 
 # 4. Build package với symlink-install
-colcon build --symlink-install --packages-select anhc_bot
+colcon build --symlink-install --packages-select anhc_astar_planner anhc_bot
 
 # 5. Source môi trường workspace sau khi build
 source install/setup.bash
@@ -115,6 +115,18 @@ Mở **Terminal 2** — Khởi động Nav2 (RViz2 sẽ tự động mở kèm g
 source ~/anhc_ws/install/setup.bash
 ros2 launch anhc_bot navigation.launch.py
 ```
+
+---
+
+### 🚀 Custom A* Global Planner
+
+Hệ thống sử dụng một global planner viết bằng thuật toán A* (được lập trình từ đầu trong package `anhc_astar_planner`). Planner này hỗ trợ 8 hướng di chuyển (8-connected) và sử dụng trọng số chi phí (weighted heuristic) kết hợp costmap.
+
+Các tham số cấu hình của planner có thể được điều chỉnh trực tiếp trong `anhc_ws/src/anhc_bot/config/nav2/nav2_params.yaml` (phần `GridBased` của `planner_server`):
+- `interpolation_resolution`: Khoảng cách giữa các điểm waypoint trên đường dẫn (mặc định: `0.05` mét).
+- `allow_unknown`: Cho phép tạo đường đi qua vùng chưa khám phá (mặc định: `true`).
+- `weight_heuristic`: Trọng số Heuristic (1.0 là tạo đường tối ưu nhất; > 1.0 sẽ tính toán nhanh hơn nhưng đường có thể bớt tối ưu).
+- `cost_penalty_factor`: Trọng số né tránh chướng ngại vật (cao hơn sẽ đi xa chướng ngại vật hơn, mặc định: `3.0`).
 
 ---
 
