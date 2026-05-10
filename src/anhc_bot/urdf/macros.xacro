@@ -4,70 +4,88 @@
     <!--................................ INERTIA MATRICES .............................. -->
 
     <xacro:macro name="cylinder_inertia" params="m r h">
-        <inertia ixx="${m * (3 * r * r + h * h) / 12}" ixy="0" ixz="0" iyy="${m * (3 * r * r + h * h) / 12}" iyz="0" izz="${m * r * r / 2}" />
+        <inertia ixx="${m * (3 * r * r + h * h) / 12}" ixy="0" ixz="0"
+                 iyy="${m * (3 * r * r + h * h) / 12}" iyz="0"
+                 izz="${m * r * r / 2}" />
     </xacro:macro>
 
     <xacro:macro name="box_inertia" params="m x y z">
-        <inertia ixx="${m * (y * y + z * z) / 12}" ixy="0" ixz="0" iyy="${m * (x * x + z * z) / 12}" iyz="0" izz="${m * (y * y + x * x) / 12}" />
+        <inertia ixx="${m * (y * y + z * z) / 12}" ixy="0" ixz="0"
+                 iyy="${m * (x * x + z * z) / 12}" iyz="0"
+                 izz="${m * (y * y + x * x) / 12}" />
     </xacro:macro>
 
     <xacro:macro name="sphere_inertia" params="m r">
-        <inertia ixx="${2 * m * r * r / 5}" ixy="0" ixz="0" iyy="${2 * m * r * r / 5}" iyz="0" izz="${2 * m * r * r / 5}" />
+        <inertia ixx="${2 * m * r * r / 5}" ixy="0" ixz="0"
+                 iyy="${2 * m * r * r / 5}" iyz="0"
+                 izz="${2 * m * r * r / 5}" />
     </xacro:macro>
 
-    <!-- ............................... TROLLEY WHEEL DEFINITION .............................. -->
+    <!-- ............... WHEEL MACRO (dùng mesh OBJ, axis quay theo Y) .............. -->
+    <!--
+        params:
+          name       — tên link, vd: front_left
+          mesh_file  — tên file OBJ không có extension, vd: front_left_wheel
+          origin_x, origin_y, origin_z — vị trí joint relative to base_link
+          mesh_cx, mesh_cy, mesh_cz   — tâm mesh (để offset về 0)
+          joint_type — "continuous" (chủ động) hoặc "fixed" (bị động caster)
+    -->
+    <xacro:macro name="wheel_link" params="name mesh_file
+                                           origin_x origin_y origin_z
+                                           mesh_cx mesh_cy mesh_cz
+                                           joint_type flip_y">
 
-    <xacro:macro name="trolley_wheel" params="cardinality dexterity origin_x origin_y origin_z">
-        <link name="${cardinality}_${dexterity}_wheel">
+        <link name="${name}_wheel">
+            <!-- Collision: cylinder (radius=wheel_radius, length=wheel_width) -->
             <collision>
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
                 <geometry>
-                    <sphere radius="${trolley_wheel_radius}"/>
+                    <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
                 </geometry>
             </collision>
-            <inertial>
-                <origin xyz="0 0 0" rpy="0 0 0" />
-                <mass value="${trolley_wheel_mass}"/>
-                <xacro:sphere_inertia m="${trolley_wheel_mass}" r="${trolley_wheel_radius}"/>
-            </inertial>
-            <mu>0.0</mu>
-        </link>
-        <joint name="${cardinality}_${dexterity}_wheel_joint" type="fixed">
-            <parent link="base_link"/>
-            <child link="${cardinality}_${dexterity}_wheel"/>
-            <origin xyz="${origin_x} ${origin_y} ${origin_z}" rpy="0 0 0" />
-            <axis xyz="0 1 0" rpy="0 0 0" />
-        </joint>
-        <gazebo reference="${cardinality}_${dexterity}_wheel">
-            <material>Gazebo/Black</material>
-        </gazebo>
-    </xacro:macro>
 
-    <xacro:macro name="traction_wheel" params="cardinality dexterity origin_x origin_y origin_z">
-        <link name="${cardinality}_${dexterity}_wheel">
-            <collision>
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+            <!-- Visual: OBJ mesh, offset để tâm trùng gốc joint -->
+            <visual>
+                <origin xyz="${-mesh_cx} ${flip_y * mesh_cz} ${-flip_y * mesh_cy}" rpy="${flip_y * pi/2} 0 0"/>
                 <geometry>
-                    <cylinder length="${traction_wheel_width}" radius="${traction_wheel_radius}"/>
+                    <mesh filename="file://$(find anhc_bot)/meshes/anhc_bot/${mesh_file}.obj" scale="1 1 1"/>
                 </geometry>
-                <self_collide>false</self_collide>
-            </collision>
+            </visual>
+
             <inertial>
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
-                <mass value="${traction_wheel_mass}"/>
-                <xacro:cylinder_inertia m="${traction_wheel_mass}" r="${traction_wheel_radius}" h="${traction_wheel_width}"/>
+                <origin xyz="0 0 0" rpy="${flip_y * pi/2} 0 0"/>
+                <mass value="${wheel_mass}"/>
+                <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}"/>
             </inertial>
-            <mu>5.0</mu>
         </link>
-        <joint name="${cardinality}_${dexterity}_wheel_joint" type="continuous">
-            <parent link="base_link"/>
-            <child link="${cardinality}_${dexterity}_wheel"/>
-            <origin xyz="${origin_x} ${origin_y} ${origin_z}" rpy="0 0 0" />
-            <axis xyz="0 1 0" rpy="0 0 0" />
-        </joint>
-        <gazebo reference="${cardinality}_${dexterity}_wheel">
-            <material>Gazebo/Black</material>
+
+        <gazebo reference="${name}_wheel">
+            <visual>
+                <material>
+                    <ambient>0.1 0.1 0.1 1.0</ambient>
+                    <diffuse>0.1 0.1 0.1 1.0</diffuse>
+                    <specular>0.05 0.05 0.05 1.0</specular>
+                </material>
+            </visual>
         </gazebo>
+
+        <joint name="${name}_wheel_joint" type="${joint_type}">
+            <parent link="base_link"/>
+            <child  link="${name}_wheel"/>
+            <origin xyz="${origin_x} ${origin_y} ${origin_z}" rpy="0 0 0"/>
+            <axis xyz="0 1 0"/>
+            <dynamics damping="0.1" friction="0.1"/>
+        </joint>
+
+        <gazebo reference="${name}_wheel">
+            <mu1>${wheel_friction}</mu1>
+            <mu2>${wheel_friction}</mu2>
+            <kp>1e6</kp>
+            <kd>100</kd>
+            <minDepth>0.001</minDepth>
+            <material>Gazebo/DarkGrey</material>
+        </gazebo>
+
     </xacro:macro>
 
 </robot>

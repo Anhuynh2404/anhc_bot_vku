@@ -8,6 +8,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, Command
 
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -34,14 +35,24 @@ def generate_launch_description():
         executable="robot_state_publisher",
         name="robot_state_publisher",
         parameters=[
-            {'robot_description': Command([
+            {'robot_description': ParameterValue(Command([
                 'xacro ', join(anhc_bot_path, 'urdf/anhc_bot.xacro'),
                 ' camera_enabled:=', camera_enabled,
                 ' stereo_camera_enabled:=', stereo_camera_enabled,
                 ' two_d_lidar_enabled:=', two_d_lidar_enabled,
                 ' odometry_source:=', odometry_source,
                 ' sim_gz:=', "true"
-            ])}],
+            ]), value_type=str)}],
+        remappings=[
+            ('/joint_states', 'anhc_bot/joint_states'),
+        ]
+    )
+
+    joint_state_publisher = Node(
+        package="joint_state_publisher",
+        executable="joint_state_publisher",
+        name="joint_state_publisher",
+        parameters=[{'use_sim_time': True}],
         remappings=[
             ('/joint_states', 'anhc_bot/joint_states'),
         ]
@@ -54,7 +65,7 @@ def generate_launch_description():
             "-topic", "/robot_description",
             "-name", "anhc_bot",
             "-allow_renaming", "true",
-            "-z", "0.28",
+            "-z", "0.0",
             "-x", position_x,
             "-y", position_y,
             "-Y", orientation_yaw
@@ -78,10 +89,10 @@ def generate_launch_description():
             "stereo_camera/right/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
             "/kinect_camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
             "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
-            "/world/default/model/anhc_bot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
+            "/world/small_warehouse/model/anhc_bot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
         ],
         remappings=[
-            ('/world/default/model/anhc_bot/joint_state', 'anhc_bot/joint_states'),
+            ('/world/small_warehouse/model/anhc_bot/joint_state', 'anhc_bot/joint_states'),
             ('/odom', 'anhc_bot/odom'),
             ('/scan', 'anhc_bot/scan'),
             ('/kinect_camera', 'anhc_bot/kinect_camera'),
@@ -119,6 +130,6 @@ def generate_launch_description():
         DeclareLaunchArgument("position_y", default_value="0.0"),
         DeclareLaunchArgument("orientation_yaw", default_value="0.0"),
         DeclareLaunchArgument("odometry_source", default_value="world"),
-        robot_state_publisher,
+        robot_state_publisher, joint_state_publisher,
         gz_spawn_entity, gz_ros2_bridge
     ])
