@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>anhc_multi_planner</name>
+  <version>1.0.0</version>
+  <description>
+    Unified multi-algorithm global planner plugin for anhc_bot.
+    Supports: astar, dijkstra, greedy_bfs, theta_star, jps, rrt_star, dstar_lite.
+    Hot-swappable at runtime via /planning/set_algorithm (std_msgs/String).
+  </description>
+
+  <maintainer email="anhuynh@anhc.dev">An Huynh</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>nav2_core</depend>
+  <depend>nav2_costmap_2d</depend>
+  <depend>nav2_util</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
