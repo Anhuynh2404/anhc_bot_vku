@@ -13,6 +13,8 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     autostart = LaunchConfiguration('autostart', default='True')
+    map_file = LaunchConfiguration('map', 
+                                  default=os.path.join(pkg_anhc, 'config', 'maps', 'factory_map.yaml'))
 
     nav2_launch_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -21,7 +23,7 @@ def generate_launch_description():
         launch_arguments={
             'use_sim_time': use_sim_time,
             'autostart': autostart,
-            'map': os.path.join(pkg_anhc, 'config', 'maps', 'anhc_map.yaml'),
+            'map': map_file,
             'params_file': os.path.join(pkg_anhc, 'config', 'nav2', 'nav2_params.yaml'),
             'package_path': pkg_anhc,
         }.items()
@@ -47,7 +49,7 @@ def generate_launch_description():
         name='map_server',
         output='screen',
         parameters=[{
-            'yaml_filename': os.path.join(pkg_anhc, 'config', 'maps', 'anhc_map.yaml')
+            'yaml_filename': map_file
         }],
     )
 

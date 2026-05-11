@@ -15,8 +15,18 @@ def generate_launch_description():
     anhc_bot_path = get_package_share_directory("anhc_bot")
     world_file = LaunchConfiguration(
         "world_file",
-        default=join(anhc_bot_path, "worlds", "small_warehouse.sdf")
+        default=join(anhc_bot_path, "worlds", "factory.sdf")
     )
+
+    # Vị trí mặc định dựa trên world
+    # Nếu là factory thì spawn ở (2.0, 2.0), nếu không thì (0.0, 0.0)
+    default_x = PythonExpression(["'2.0' if 'factory' in '", world_file, "' else '0.0'"])
+    default_y = PythonExpression(["'2.0' if 'factory' in '", world_file, "' else '0.0'"])
+    default_yaw = PythonExpression(["'1.57' if 'factory' in '", world_file, "' else '0.0'"])
+
+    position_x = LaunchConfiguration("position_x", default=default_x)
+    position_y = LaunchConfiguration("position_y", default=default_y)
+    orientation_yaw = LaunchConfiguration("orientation_yaw", default=default_yaw)
     gz_sim_share = get_package_share_directory("ros_gz_sim")
 
     gz_sim = IncludeLaunchDescription(
@@ -30,7 +40,11 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             join(anhc_bot_path, "launch", "anhc_bot_gz_spawn.launch.py")
         ),
-        launch_arguments={}.items()
+        launch_arguments={
+            "position_x": position_x,
+            "position_y": position_y,
+            "orientation_yaw": orientation_yaw
+        }.items()
     )
 
     return LaunchDescription([
@@ -41,10 +55,17 @@ def generate_launch_description():
 
         AppendEnvironmentVariable(
             name='GZ_SIM_RESOURCE_PATH',
+            value=join(anhc_bot_path, "worlds", "models")),
+
+        AppendEnvironmentVariable(
+            name='GZ_SIM_RESOURCE_PATH',
             value=join(anhc_bot_path, "models")),
 
         DeclareLaunchArgument("use_sim_time", default_value=use_sim_time),
         DeclareLaunchArgument("world_file", default_value=world_file),
+        DeclareLaunchArgument("position_x", default_value=position_x),
+        DeclareLaunchArgument("position_y", default_value=position_y),
+        DeclareLaunchArgument("orientation_yaw", default_value=orientation_yaw),
 
         gz_sim, spawn_anhc_bot_node
     ])

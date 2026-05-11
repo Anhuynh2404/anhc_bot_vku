@@ -89,10 +89,10 @@ def generate_launch_description():
             "stereo_camera/right/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
             "/kinect_camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
             "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
-            "/world/small_warehouse/model/anhc_bot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
+            "/world/factory/model/anhc_bot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
         ],
         remappings=[
-            ('/world/small_warehouse/model/anhc_bot/joint_state', 'anhc_bot/joint_states'),
+            ('/world/factory/model/anhc_bot/joint_state', 'anhc_bot/joint_states'),
             ('/odom', 'anhc_bot/odom'),
             ('/scan', 'anhc_bot/scan'),
             ('/kinect_camera', 'anhc_bot/kinect_camera'),
